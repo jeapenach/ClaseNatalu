@@ -1,0 +1,22 @@
+{
+  "name": "vetyshop",
+  "version": "1.0.0",
+  "description": "TiendaVirtual de productos para mascotas",
+  "main": "server.js",
+  "scripts": {
+    "start": "node back/server.js",
+    "dev": "SET NODE_ENV = DEVELOPMENT& nodemon back/server",
+    "prod": "SET NODE_ENV = PRODUCTION& nodemon back/server"
+  },
+  "author": "Jesus Peña",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "mongoose": "^6.6.7",
+    "node-fetch": "^3.2.10"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  }
+}
