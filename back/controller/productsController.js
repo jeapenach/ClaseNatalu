@@ -1,4 +1,6 @@
-const producto = require("../models/productos") //importar el Schema de producto para poder usarlo
+const catchAsyncErrors = require("../middleware/catchAsyncErrors");
+const producto = require("../models/productos"); //importar el Schema de producto para poder usarlo
+const ErrorHandler = require("../utils/errorHandler");
 const fetch = (url) => import('node-fetch').then(({default:fetch}) => fetch(url));
 
 //Ver la lista de productos
@@ -6,11 +8,8 @@ const fetch = (url) => import('node-fetch').then(({default:fetch}) => fetch(url)
 exports.getProducts = async(req, res, next) => {
     const productos = await producto.find();
     if(!productos){
-        return res.status(404).json({
-            success: false,
-            message: "No se encuentran los productos"
-        })
-    }else{
+        return next(new ErrorHandler("Información no encontrada", 404))
+        }else{
         res.status(200).json({
             success:true,
             count: productos.length,
@@ -21,43 +20,35 @@ exports.getProducts = async(req, res, next) => {
 
 //Consulta de un producto por ID
 
-exports.getProductsById = async(req, res, next) => {
+exports.getProductsById = catchAsyncErrors(async(req, res, next) => {
     const product = await producto.findById(req.params.id);
     if (!product){
-        return res.status(404).json({
-            sucess: false,
-            message: "No se encuentra ese producto",
-            error: true
-        })
-    }else{
-        res.status(200).json({
-            success:true,
-            mensaje: "esta es la información del producto solicitado",
-            product
-        })
-    }   
-}
+        return next(new ErrorHandler("Producto no encontrado", 404))
+        }
+    res.status(200).json({
+        success:true,
+        mensaje: "esta es la información del producto solicitado",
+        product
+    })
+})
 
 //Crear un nuevo producto /api/productos
-exports.newProduct = async(req, res, next) => {
+exports.newProduct = catchAsyncErrors(async(req, res, next) => {
     const product = await producto.create(req.body);
     res.status(201).json({
         sucess:true,
         product
     })
-}
+})
 
 //Update un producto
 
-exports.updateProduct = async(req,res,next) => {
+exports.updateProduct = catchAsyncErrors( async(req,res,next) => {
     let product = await producto.findById(req.params.id);
     //Verifico si el producto existe
     if (!product){
-        return res.status(404).json({
-            sucess: false,
-            message: "No se encuentra ese producto"
-        })
-    }
+        return next(new ErrorHandler("Producto no encontrado", 404))
+        }
     //Si existe, ejecuto la actualización
     else{  
         product = await producto.findByIdAndUpdate(req.params.id, req.body,{
@@ -71,25 +62,25 @@ exports.updateProduct = async(req,res,next) => {
             product
         })
     }    
-}
+})
 
 //Eliminar un producto
-exports.deleteProduct = async(req,res,next) => {
+exports.deleteProduct = catchAsyncErrors(async(req,res,next) => {
     const product = await producto.findById(req.params.id);
     //Verifico si el producto existe
     if (!product){
-        return res.status(404).json({ //Si el objeto no existe, return termina el método
-            sucess: false,
-            message: "No se encuentra ese producto"
-        })
-    }else{
+
+        return next(new ErrorHandler("Producto no encontrado", 404))
+        
+        }else{
+        
         await product.remove(); //Eliminamos el producto
         res.status(200).json({
             success: true,
             message: "Producto eliminado correctamente"
         })
     }
-}
+})
 
 //Hablemos de FETCH
 //Ver todos los productos
